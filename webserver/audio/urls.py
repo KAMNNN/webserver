@@ -1,6 +1,6 @@
-from django.urls import path
-from audio import views
+from django.urls import re_path
+from audio.views import UploadView
 
 urlpatterns = [
-    path('audio/', views.audio_upload),
+    re_path(r'^audio/$', UploadView.as_view()),
 ]

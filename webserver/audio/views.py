@@ -1,24 +1,22 @@
-from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.exceptions import ParseError
+from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
-from audio.models import Audio
-from audio.serializers import AudioSerializer
+from rest_framework.views import APIView
 
+class AudioUploadParser(FileUploadParser):
+    media_type = 'audio/wav'
 
-@api_view(['GET', 'POST'])
-def audio_upload(request):
-    if request.method == 'GET':
-        audios = Audio.objects.all()
-        serializer = AudioSerializer(audios, many=True)
-        return Response(serializer.data)
+class UploadView(APIView):
+    parser_classes = [AudioUploadParser,]
 
-    elif request.method == 'POST':
-        serializer = AudioSerializer(data=request.data)
+    def post(self, request, format=None):
+        if 'file' not in request.data:
+            raise ParseError("No audio content")
+        f = request.data['file']
 
-	#  Add code here to process audio
-        print('Process here!')
+        # process here
+        content_bytes = f.read()
+        size = f.size
+        print(content_bytes)
 
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=204)
